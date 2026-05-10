@@ -1,0 +1,36 @@
+{
+  "name": "cce-electron",
+  "version": "1.0.0",
+  "description": "CCE — Conspiracy Connection Engine Desktop Browser",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --inspect",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.cce.browser",
+    "productName": "CCE Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "arch": ["arm64", "x64"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "keywords": [],
+  "author": "CCE",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest"
+  }
+}
