@@ -569,7 +569,7 @@ async function saveToSolana(){
     tx.add(new solanaWeb3.TransactionInstruction({
       keys:[{pubkey:fromPubkey,isSigner:true,isWritable:false}],
       programId:MEMO_PROGRAM,
-      data:Buffer.from(payload,'utf-8')
+      data:new TextEncoder().encode(payload)
     }));
     const{signature}=await window.solana.signAndSendTransaction(tx);
     setStep(3,'done');
