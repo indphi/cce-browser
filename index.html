@@ -544,7 +544,7 @@ async function saveToSolana(){
     // Step 2 — Connect to network
     setStep(2,'active');
     const connection=new solanaWeb3.Connection(
-      solanaWeb3.clusterApiUrl('mainnet-beta'),
+      'https://rpc.ankr.com/solana',
       'confirmed'
     );
     const{blockhash,lastValidBlockHeight}=await connection.getLatestBlockhash();
