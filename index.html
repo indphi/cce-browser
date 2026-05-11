@@ -9,13 +9,29 @@
 <style>
 :root{--bg:#080810;--bg2:#0e0e1a;--bg3:#13131f;--border:#1e1e32;--border2:#2a2a42;--accent:#6c63ff;--accent2:#ff6584;--accent3:#43e8b0;--sol:#9945FF;--sol2:#14F195;--text:#dddaf5;--muted:#6a6880;--dim:#3a384e;--mono:'Share Tech Mono',monospace;--sans:'Syne',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
 body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:9999}
-#shell{display:grid;grid-template-rows:56px 1fr;height:100vh}
+
+/* ── BRAVE BANNER ── */
+#brave-banner{background:linear-gradient(135deg,rgba(255,100,50,.08),rgba(153,69,255,.08));border-bottom:1px solid rgba(255,100,50,.2);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;font-size:11px;font-family:var(--mono)}
+.brave-left{display:flex;align-items:center;gap:10px;color:var(--muted)}
+.brave-logo{font-size:16px}
+.brave-text strong{color:var(--text)}
+.brave-right{display:flex;align-items:center;gap:8px}
+.brave-pill{font-size:9px;padding:2px 7px;border-radius:10px;border:1px solid;font-family:var(--mono);font-weight:600}
+.brave-pill.good{border-color:var(--accent3);color:var(--accent3)}
+.brave-pill.warn{border-color:#ff9944;color:#ff9944}
+#banner-close{background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;padding:0 4px}
+#banner-close:hover{color:var(--text)}
+
+/* ── LAYOUT ── */
+#shell{display:grid;grid-template-rows:auto 56px 1fr;height:100vh}
 #topbar{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--bg2);z-index:10}
 #main{display:grid;grid-template-columns:300px 1fr;overflow:hidden}
 #sidebar{border-right:1px solid var(--border);overflow-y:auto;background:var(--bg2);display:flex;flex-direction:column}
 #canvas{display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ── */
 .logo{font-size:15px;font-weight:800;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;white-space:nowrap;user-select:none}
 .logo span{color:var(--accent2)}
 .topbar-mid{flex:1;display:flex;align-items:center;gap:8px}
@@ -29,14 +45,20 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #status-indicator{width:8px;height:8px;border-radius:50%;background:var(--accent3);box-shadow:0 0 6px var(--accent3);flex-shrink:0}
 #status-indicator.busy{background:var(--accent2);box-shadow:0 0 6px var(--accent2);animation:pdot 1s infinite}
 @keyframes pdot{0%,100%{opacity:1}50%{opacity:.3}}
-#wallet-btn{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--sol),#7b2fff);border:none;border-radius:4px;padding:6px 12px;font-size:11px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;transition:all .2s}
-#wallet-btn:hover{opacity:.9}
+
+/* ── PHANTOM BTN ── */
+#wallet-btn{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--sol),#7b2fff);border:none;border-radius:4px;padding:6px 14px;font-size:11px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;transition:all .2s;position:relative;overflow:hidden}
+#wallet-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);opacity:0;transition:opacity .2s}
+#wallet-btn:hover::after{opacity:1}
 #wallet-btn.connected{background:linear-gradient(135deg,#0a8a5a,var(--sol2))}
-.wdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)}
-.wdot.live{background:#fff;box-shadow:0 0 4px #fff}
+#wallet-btn.connecting{animation:pdot 1s infinite}
+.wdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);flex-shrink:0}
+.wdot.live{background:#fff;box-shadow:0 0 5px #fff}
 #key-btn{font-size:10px;font-family:var(--mono);color:var(--muted);background:none;border:1px solid var(--border);border-radius:4px;padding:5px 8px;cursor:pointer;transition:all .15s}
 #key-btn:hover{color:var(--text);border-color:var(--border2)}
 #key-btn.set{border-color:var(--accent3)!important;color:var(--accent3)!important}
+
+/* ── SIDEBAR ── */
 .sidebar-section{padding:12px 14px;border-bottom:1px solid var(--border)}
 .sec-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:700}
 #tags-wrap{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;min-height:8px}
@@ -47,31 +69,46 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #tag-input:focus{border-color:var(--accent)}
 #tag-input::placeholder{color:var(--dim)}
 .source-list{display:flex;flex-direction:column;gap:4px}
-.source-row{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:4px}
+.source-row{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;transition:border-color .15s}
+.source-row:hover{border-color:var(--border2)}
 .source-name{font-size:11px;font-family:var(--mono);color:var(--text)}
 .source-badge{font-size:9px;padding:1px 4px;border-radius:2px;background:var(--border);color:var(--muted);margin-left:4px;font-family:var(--mono)}
-.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:all .2s}
 .stoggle{background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:2px}
 .ctrl-row{display:flex;gap:5px;margin-bottom:5px}
 .ctrl-select{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:5px 7px;font-size:11px;font-family:var(--mono);color:var(--text);cursor:pointer;outline:none}
-.go-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:4px;font-size:13px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;letter-spacing:.06em;transition:all .2s;margin-top:4px}
+.go-btn{width:100%;padding:10px;background:var(--accent);border:none;border-radius:4px;font-size:13px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;letter-spacing:.06em;transition:all .2s;margin-top:4px;position:relative;overflow:hidden}
+.go-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transform:translateX(-100%);transition:transform .5s}
+.go-btn:hover:not(:disabled)::after{transform:translateX(100%)}
 .go-btn:hover:not(:disabled){background:#5550ee}
 .go-btn:disabled{opacity:.35;cursor:not-allowed}
 .go-btn.loading{background:var(--bg3);color:var(--accent);border:1px solid var(--accent);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-#save-sol-btn{width:100%;padding:9px;background:linear-gradient(135deg,var(--sol),#7b2fff);border:none;border-radius:4px;font-size:12px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;letter-spacing:.04em;transition:all .2s;margin-top:6px;display:none;align-items:center;justify-content:center;gap:6px}
+
+/* ── SOLANA SAVE ── */
+#save-sol-btn{width:100%;padding:10px;background:linear-gradient(135deg,var(--sol),#7b2fff);border:none;border-radius:4px;font-size:12px;font-family:var(--sans);font-weight:700;color:#fff;cursor:pointer;letter-spacing:.04em;transition:all .2s;margin-top:6px;display:none;align-items:center;justify-content:center;gap:7px;position:relative;overflow:hidden}
+#save-sol-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:transform .5s}
+#save-sol-btn:hover::after{transform:translateX(100%)}
 #save-sol-btn.show{display:flex}
-#save-sol-btn:hover{opacity:.9;transform:translateY(-1px)}
-#onchain-badge{display:none;align-items:center;gap:6px;padding:6px 8px;background:rgba(20,241,149,.06);border:1px solid rgba(20,241,149,.2);border-radius:4px;margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--sol2)}
+#save-sol-btn:disabled{opacity:.4;cursor:not-allowed}
+#save-sol-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 20px rgba(153,69,255,.4)}
+#no-wallet-hint{display:none;font-size:10px;font-family:var(--mono);color:#ff9944;margin-top:5px;text-align:center}
+#no-wallet-hint.show{display:block}
+#onchain-badge{display:none;align-items:center;gap:6px;padding:7px 10px;background:rgba(20,241,149,.06);border:1px solid rgba(20,241,149,.25);border-radius:4px;margin-top:6px;font-size:10px;font-family:var(--mono);color:var(--sol2)}
 #onchain-badge.show{display:flex}
 #onchain-link{color:var(--sol2);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 #onchain-link:hover{text-decoration:underline}
+
+/* ── RESULTS ── */
 #results-list{flex:1;overflow-y:auto;padding:3px 5px}
 .result-item{padding:8px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;background:var(--bg3);cursor:pointer;transition:all .15s}
-.result-item:hover{border-color:var(--border2)}
+.result-item:hover{border-color:var(--border2);background:var(--bg2)}
 .result-source{font-size:9px;font-family:var(--mono);margin-bottom:2px;letter-spacing:.05em}
 .result-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.4}
 .result-snippet{font-size:10px;color:var(--muted);line-height:1.5}
+.result-url{font-size:9px;font-family:var(--mono);color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── CANVAS ── */
 #view-tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2)}
 .vtab{padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans)}
 .vtab.active{color:var(--accent);border-bottom-color:var(--accent)}
@@ -83,6 +120,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .view-panel.active{display:block}
 #graph-panel{background:var(--bg)}
 #graph-svg{width:100%;height:100%}
+
+/* ── ANALYSIS ── */
 #analysis-panel{padding:20px;overflow-y:auto}
 .analysis-title{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px}
 .analysis-meta{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:16px}
@@ -92,62 +131,91 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .node-pill{font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:2px;border:1px solid}
 .arrow{font-size:13px;color:var(--muted)}
 .card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px}
-.card-body{font-size:12px;color:var(--muted);line-height:1.7}
+.card-body{font-size:12px;color:var(--muted);line-height:1.75}
 .strength-row{display:flex;align-items:center;gap:8px;margin-top:8px}
 .strength-label{font-size:10px;font-family:var(--mono);color:var(--dim);width:55px}
 .strength-track{flex:1;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
 .strength-bar{height:100%;border-radius:2px}
 .strength-pct{font-size:10px;font-family:var(--mono);color:var(--muted);width:30px;text-align:right}
 .deep-block{border:1px solid var(--border);border-radius:6px;padding:18px;background:var(--bg2);margin-top:6px}
-.deep-block p{font-size:13px;line-height:1.85;color:var(--muted)}
+.deep-block p{font-size:13px;line-height:1.9;color:var(--muted)}
+
+/* ── SOURCES PANEL ── */
 #sources-panel{padding:14px;overflow-y:auto}
 .srg-header{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent3);font-family:var(--mono);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
 .sr-item{padding:8px 0;border-bottom:1px solid var(--border)}
 .sr-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .sr-url{font-size:10px;font-family:var(--mono);margin-bottom:3px}
 .sr-snippet{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── SOLANA PANEL ── */
 #solana-panel{padding:20px;overflow-y:auto}
-.sol-hero{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:16px;background:linear-gradient(135deg,rgba(153,69,255,.1),rgba(20,241,149,.05));border:1px solid rgba(153,69,255,.3);border-radius:8px}
-.sol-hero-icon{font-size:32px}
-.sol-hero-title{font-size:18px;font-weight:800;color:var(--text)}
-.sol-hero-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.sol-hero{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:18px;background:linear-gradient(135deg,rgba(153,69,255,.1),rgba(20,241,149,.05));border:1px solid rgba(153,69,255,.25);border-radius:10px}
+.sol-hero-glyph{font-size:36px;filter:drop-shadow(0 0 12px rgba(153,69,255,.6))}
+.sol-hero-title{font-size:20px;font-weight:800;color:var(--text)}
+.sol-hero-sub{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
 .sol-why{border:1px solid rgba(153,69,255,.2);border-radius:6px;padding:14px;margin-bottom:16px;background:rgba(153,69,255,.04)}
-.sol-why-title{font-size:10px;font-weight:700;color:var(--sol2);margin-bottom:8px;font-family:var(--mono);letter-spacing:.08em}
-.sol-why-body{font-size:12px;color:var(--muted);line-height:1.75}
-.sol-record{border:1px solid rgba(20,241,149,.2);border-radius:6px;padding:12px;margin-bottom:8px;background:rgba(20,241,149,.03)}
-.sol-record-terms{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
-.sol-record-meta{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:4px}
-.sol-record-link{font-size:10px;font-family:var(--mono);color:var(--sol);text-decoration:none}
-.sol-record-link:hover{text-decoration:underline}
-.no-records{font-size:12px;color:var(--dim);font-family:var(--mono);text-align:center;padding:30px 20px;line-height:1.8}
+.sol-why-title{font-size:10px;font-weight:700;color:var(--sol2);margin-bottom:8px;font-family:var(--mono);letter-spacing:.1em}
+.sol-why-body{font-size:12px;color:var(--muted);line-height:1.8}
+.sol-record{border:1px solid rgba(20,241,149,.2);border-radius:6px;padding:14px;margin-bottom:8px;background:rgba(20,241,149,.03);transition:border-color .15s}
+.sol-record:hover{border-color:rgba(20,241,149,.4)}
+.sol-record-terms{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.sol-record-meta{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:6px}
+.sol-record-link{font-size:10px;font-family:var(--mono);color:var(--sol);text-decoration:none;display:flex;align-items:center;gap:4px}
+.sol-record-link:hover{color:var(--sol2);text-decoration:underline}
+.no-records{font-size:12px;color:var(--dim);font-family:var(--mono);text-align:center;padding:40px 20px;line-height:2;border:1px dashed var(--border);border-radius:6px}
+
+/* ── EMPTY STATES ── */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;padding:40px}
-.empty-glyph{font-size:40px;opacity:.25;filter:grayscale(1)}
+.empty-glyph{font-size:40px;opacity:.2;filter:grayscale(1)}
 .empty-title{font-size:14px;font-weight:700;color:var(--muted)}
-.empty-sub{font-size:12px;line-height:1.65;max-width:280px;color:var(--dim)}
+.empty-sub{font-size:12px;line-height:1.7;max-width:280px;color:var(--dim)}
+
+/* ── LOG ── */
 #log-strip{border-top:1px solid var(--border);padding:5px 14px;background:var(--bg2);font-size:10px;font-family:var(--mono);color:var(--muted);display:flex;align-items:center;gap:8px;min-height:24px}
 #log-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.log-sol{color:var(--sol2)!important}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:26px;width:420px;max-width:90vw}
-.modal-title{font-size:16px;font-weight:800;margin-bottom:6px}
-.modal-sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.65}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:28px;width:440px;max-width:92vw}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.7}
 .modal-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:4px;padding:9px 12px;font-size:13px;font-family:var(--mono);color:var(--text);outline:none;margin-bottom:10px;transition:border-color .2s}
 .modal-input:focus{border-color:var(--accent)}
 .modal-note{font-size:11px;color:var(--dim);margin-bottom:14px;line-height:1.6;font-family:var(--mono)}
 .modal-row{display:flex;gap:8px;justify-content:flex-end}
-.modal-cancel{background:none;border:1px solid var(--border2);border-radius:4px;padding:7px 14px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans)}
-.modal-save{background:var(--accent);border:none;border-radius:4px;padding:7px 16px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans)}
+.modal-cancel{background:none;border:1px solid var(--border2);border-radius:4px;padding:7px 16px;font-size:12px;color:var(--muted);cursor:pointer;font-family:var(--sans)}
+.modal-save{background:var(--accent);border:none;border-radius:4px;padding:7px 18px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--sans)}
 .modal-cancel:hover{color:var(--text)}
 .modal-save:hover{background:#5550ee}
-.tx-steps{list-style:none;margin:14px 0}
-.tx-step{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
+
+/* ── TX MODAL ── */
+#tx-modal .modal-box{border-color:rgba(153,69,255,.5)}
+.tx-steps{list-style:none;margin:16px 0}
+.tx-step{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted)}
 .tx-step:last-child{border:none}
-.tx-ico{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700}
-.tx-ico.done{background:var(--sol2);color:#000}
-.tx-ico.active{background:var(--sol);color:#fff;animation:pdot 1s infinite}
+.tx-ico{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700;transition:all .3s}
 .tx-ico.wait{background:var(--border);color:var(--muted)}
-#tx-sig{font-size:10px;font-family:var(--mono);color:var(--sol2);margin-top:10px;word-break:break-all;display:none}
-#tx-sig a{color:var(--sol2)}
+.tx-ico.active{background:var(--sol);color:#fff;animation:pdot 1s infinite}
+.tx-ico.done{background:var(--sol2);color:#000}
+#tx-result{margin-top:12px;display:none}
+#tx-result.show{display:block}
+.tx-success{padding:12px;background:rgba(20,241,149,.06);border:1px solid rgba(20,241,149,.25);border-radius:6px}
+.tx-success-title{font-size:12px;font-weight:700;color:var(--sol2);margin-bottom:6px;font-family:var(--mono)}
+.tx-sig-link{font-size:10px;font-family:var(--mono);color:var(--sol);text-decoration:none;word-break:break-all;line-height:1.6}
+.tx-sig-link:hover{color:var(--sol2);text-decoration:underline}
+.tx-error{padding:10px;background:rgba(255,100,100,.06);border:1px solid rgba(255,100,100,.2);border-radius:6px;font-size:11px;font-family:var(--mono);color:#ff6666}
+
+/* ── NO PHANTOM MODAL ── */
+#phantom-modal .modal-box{border-color:rgba(153,69,255,.4)}
+.phantom-steps{margin:16px 0;display:flex;flex-direction:column;gap:10px}
+.phantom-step{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted)}
+.phantom-step-num{width:22px;height:22px;border-radius:50%;background:var(--sol);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.phantom-link{display:block;width:100%;padding:10px;background:linear-gradient(135deg,var(--sol),#7b2fff);border:none;border-radius:6px;font-size:13px;font-weight:700;color:#fff;cursor:pointer;text-align:center;text-decoration:none;margin-top:6px;transition:opacity .2s}
+.phantom-link:hover{opacity:.9}
+
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -157,14 +225,30 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </head>
 <body>
 <div id="shell">
+
+  <!-- BRAVE BANNER -->
+  <div id="brave-banner">
+    <div class="brave-left">
+      <span class="brave-logo">🦁</span>
+      <span class="brave-text">CCE runs best on <strong>Brave Browser</strong> with <strong>Phantom Wallet</strong> — no Google, no tracking, real on-chain saves</span>
+    </div>
+    <div class="brave-right">
+      <span class="brave-pill good">No Google</span>
+      <span class="brave-pill good">No Tracking</span>
+      <span id="phantom-status-pill" class="brave-pill warn">Phantom: Not detected</span>
+      <button id="banner-close" onclick="document.getElementById('brave-banner').style.display='none'">×</button>
+    </div>
+  </div>
+
+  <!-- TOPBAR -->
   <div id="topbar">
     <div class="logo">C<span>·</span>C<span>·</span>E</div>
     <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
       <div id="status-indicator"></div>
-      <span class="version-badge">v1.0 · SOLANA</span>
+      <span class="version-badge">v1.0 · BRAVE + SOLANA</span>
     </div>
     <div class="topbar-mid">
-      <input id="main-search" placeholder="Quick search — press Enter...">
+      <input id="main-search" placeholder="Quick search — press Enter to investigate...">
       <button class="tb-btn" onclick="quickSearch()">Search</button>
       <button class="tb-btn active" id="map-btn" onclick="switchMode('map')">Map</button>
       <button class="tb-btn" id="dive-btn" onclick="switchMode('dive')">Deep Dive</button>
@@ -177,17 +261,20 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   </div>
 
   <div id="main">
+    <!-- SIDEBAR -->
     <div id="sidebar">
       <div class="sidebar-section">
         <div class="sec-label">Investigation Terms</div>
         <div id="tags-wrap"></div>
         <input id="tag-input" placeholder="Add term + Enter..." maxlength="60">
-        <div style="font-size:10px;color:var(--dim);margin-top:4px;font-family:var(--mono)">Up to 8 · Enter or comma</div>
+        <div style="font-size:10px;color:var(--dim);margin-top:4px;font-family:var(--mono)">Up to 8 terms · Enter or comma to add</div>
       </div>
+
       <div class="sidebar-section">
-        <div class="sec-label">Search Sources <span style="color:var(--dim);font-size:8px">NO GOOGLE · NO TRACKING</span></div>
+        <div class="sec-label">Search Sources <span style="color:var(--dim);font-size:8px">· NO GOOGLE · NO TRACKING</span></div>
         <div class="source-list" id="source-list"></div>
       </div>
+
       <div class="sidebar-section">
         <div class="sec-label">Analysis Settings</div>
         <div class="ctrl-row">
@@ -204,14 +291,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         </div>
         <button class="go-btn" id="go-btn" onclick="runAll()" disabled>CONNECT THE DOTS</button>
         <button id="save-sol-btn" onclick="saveToSolana()">◎ &nbsp;SAVE INVESTIGATION ON-CHAIN</button>
-        <div id="onchain-badge">◎ &nbsp;<a id="onchain-link" href="#" target="_blank">View on Solana Explorer →</a></div>
+        <div id="no-wallet-hint">⚠ Connect Phantom wallet to save on-chain</div>
+        <div id="onchain-badge">◎ &nbsp;<a id="onchain-link" href="#" target="_blank">Saved · View on Solana Explorer →</a></div>
       </div>
+
       <div style="padding:8px 14px 4px;flex-shrink:0">
         <div class="sec-label">Raw Results <span id="result-count" style="color:var(--dim)"></span></div>
       </div>
       <div id="results-list"></div>
     </div>
 
+    <!-- CANVAS -->
     <div id="canvas">
       <div id="view-tabs">
         <button class="vtab active" onclick="switchTab('graph')">Connection Map</button>
@@ -220,49 +310,56 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <button class="vtab sol" onclick="switchTab('solana')">◎ On-Chain</button>
       </div>
       <div id="view-area">
+
         <div class="view-panel active" id="graph-panel">
           <div class="empty-state" id="graph-empty">
             <div class="empty-glyph">🕸</div>
             <div class="empty-title">No connections mapped yet</div>
-            <div class="empty-sub">Add investigation terms and hit Connect the Dots to begin.</div>
+            <div class="empty-sub">Add investigation terms in the sidebar and hit Connect the Dots to reveal the hidden network.</div>
           </div>
           <svg id="graph-svg" style="display:none"></svg>
         </div>
+
         <div class="view-panel" id="analysis-panel">
           <div class="empty-state" id="analysis-empty">
             <div class="empty-glyph">🧠</div>
             <div class="empty-title">No analysis yet</div>
-            <div class="empty-sub">Run the engine to generate an AI-powered deep connection analysis.</div>
+            <div class="empty-sub">Run the engine to generate an AI-powered deep connection analysis from uncensored sources.</div>
           </div>
           <div id="analysis-content" style="display:none"></div>
         </div>
+
         <div class="view-panel" id="sources-panel">
           <div class="empty-state" id="sources-empty">
             <div class="empty-glyph">📡</div>
             <div class="empty-title">No sources fetched yet</div>
-            <div class="empty-sub">Results from alternative search engines appear here after running a search.</div>
+            <div class="empty-sub">Results from DuckDuckGo, Wikipedia, Internet Archive, and Marginalia appear here.</div>
           </div>
           <div id="sources-content" style="display:none;padding:14px"></div>
         </div>
+
         <div class="view-panel" id="solana-panel">
-          <div class="sol-hero">
-            <div class="sol-hero-icon">◎</div>
-            <div>
-              <div class="sol-hero-title">On-Chain Investigations</div>
-              <div class="sol-hero-sub">Censorship-proof research — permanently stored on Solana</div>
+          <div style="padding:20px">
+            <div class="sol-hero">
+              <div class="sol-hero-glyph">◎</div>
+              <div>
+                <div class="sol-hero-title">On-Chain Investigations</div>
+                <div class="sol-hero-sub">Permanent. Immutable. Censorship-proof.<br>Your research lives on Solana forever.</div>
+              </div>
             </div>
-          </div>
-          <div style="padding:0 0 16px">
             <div class="sol-why">
-              <div class="sol-why-title">WHY SOLANA?</div>
-              <div class="sol-why-body">Every investigation saved through CCE is written to Solana as an immutable memo transaction. No government, no corporation, no platform can delete or alter it. Your research becomes a permanent part of the historical record — censorship-proof, timestamped, and verifiable by anyone on Earth.</div>
+              <div class="sol-why-title">WHY THE BLOCKCHAIN?</div>
+              <div class="sol-why-body">When you save an investigation through CCE, it's written to Solana as an immutable memo transaction. No government can delete it. No platform can suppress it. No corporation can make it disappear. Every saved investigation is timestamped, wallet-signed, and permanently verifiable by anyone on Earth. <strong style="color:var(--text)">The truth belongs on-chain.</strong></div>
             </div>
-            <div class="sec-label" style="margin-bottom:10px">Saved Investigations</div>
+            <div class="sec-label" style="margin-bottom:12px">Your Saved Investigations</div>
             <div id="sol-records"></div>
           </div>
         </div>
+
       </div>
-      <div id="log-strip"><div id="log-text">// CCE v1.0 · Solana-powered · censorship-resistant research engine</div></div>
+      <div id="log-strip">
+        <div id="log-text">// CCE v1.0 · Brave + Solana · censorship-resistant research engine · no google · no gatekeepers</div>
+      </div>
     </div>
   </div>
 </div>
@@ -271,9 +368,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div class="modal-overlay" id="key-modal">
   <div class="modal-box">
     <div class="modal-title">Anthropic API Key</div>
-    <div class="modal-sub">Powers the AI connection engine. Stored in session only — never sent anywhere except Anthropic.</div>
+    <div class="modal-sub">Powers the AI connection engine. Stored in session memory only — never sent anywhere except directly to Anthropic's API.</div>
     <input class="modal-input" id="key-input" type="password" placeholder="sk-ant-...">
-    <div class="modal-note">Get yours at console.anthropic.com → API Keys</div>
+    <div class="modal-note">Get yours free at console.anthropic.com → API Keys</div>
     <div class="modal-row">
       <button class="modal-cancel" onclick="closeModal('key-modal')">Cancel</button>
       <button class="modal-save" onclick="saveKey()">Save Key</button>
@@ -283,251 +380,621 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <!-- TX MODAL -->
 <div class="modal-overlay" id="tx-modal">
-  <div class="modal-box" style="border-color:rgba(153,69,255,.4)">
+  <div class="modal-box">
     <div class="modal-title" style="color:var(--sol2)">◎ Saving to Solana</div>
-    <div class="modal-sub">Writing your investigation to the blockchain as an immutable record...</div>
+    <div class="modal-sub">Writing your investigation to the blockchain as a permanent, immutable record...</div>
     <ul class="tx-steps">
-      <li class="tx-step"><div class="tx-ico wait" id="ico1">1</div><span>Preparing investigation data</span></li>
-      <li class="tx-step"><div class="tx-ico wait" id="ico2">2</div><span>Connecting to Solana mainnet</span></li>
-      <li class="tx-step"><div class="tx-ico wait" id="ico3">3</div><span>Signing with Phantom wallet</span></li>
-      <li class="tx-step"><div class="tx-ico wait" id="ico4">4</div><span>Confirming on-chain</span></li>
+      <li class="tx-step"><div class="tx-ico wait" id="ico1">1</div><span id="step-text-1">Preparing investigation data</span></li>
+      <li class="tx-step"><div class="tx-ico wait" id="ico2">2</div><span id="step-text-2">Connecting to Solana mainnet</span></li>
+      <li class="tx-step"><div class="tx-ico wait" id="ico3">3</div><span id="step-text-3">Waiting for Phantom signature...</span></li>
+      <li class="tx-step"><div class="tx-ico wait" id="ico4">4</div><span id="step-text-4">Confirming on-chain</span></li>
     </ul>
-    <div id="tx-sig"></div>
-    <div class="modal-row" style="margin-top:12px">
+    <div id="tx-result"></div>
+    <div class="modal-row" style="margin-top:14px">
       <button class="modal-cancel" id="tx-close" onclick="closeModal('tx-modal')" style="display:none">Close</button>
     </div>
   </div>
 </div>
 
+<!-- NO PHANTOM MODAL -->
+<div class="modal-overlay" id="phantom-modal">
+  <div class="modal-box">
+    <div class="modal-title" style="color:var(--sol)">◎ Phantom Not Detected</div>
+    <div class="modal-sub">CCE needs the Phantom wallet extension to save investigations on Solana. It takes 60 seconds to set up.</div>
+    <div class="phantom-steps">
+      <div class="phantom-step"><div class="phantom-step-num">1</div><span>Open <strong style="color:var(--text)">Brave Browser</strong> (recommended — no Google, no tracking)</span></div>
+      <div class="phantom-step"><div class="phantom-step-num">2</div><span>Install the <strong style="color:var(--text)">Phantom wallet extension</strong> from phantom.app</span></div>
+      <div class="phantom-step"><div class="phantom-step-num">3</div><span>Create or import your Solana wallet, then come back and click Connect</span></div>
+    </div>
+    <a class="phantom-link" href="https://phantom.app" target="_blank">Get Phantom Wallet →</a>
+    <div class="modal-row" style="margin-top:12px">
+      <button class="modal-cancel" onclick="closeModal('phantom-modal')">Maybe Later</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const S={tags:[],apiKey:(()=>{try{return sessionStorage.getItem('cce_key')||'';}catch{return '';}}()),mode:'map',results:{},connections:[],analysis:'',running:false,wallet:null,records:JSON.parse(localStorage.getItem('cce_sol_records')||'[]')};
-const SOURCES=[{id:'ddg',name:'DuckDuckGo',on:true,color:'#de5833',badge:'no track'},{id:'wikimedia',name:'Wikipedia',on:true,color:'#a0c8ff',badge:'open'},{id:'archive',name:'Internet Archive',on:true,color:'#43e8b0',badge:'archived'},{id:'marginalia',name:'Marginalia',on:true,color:'#b388ff',badge:'indie'}];
+// ── STATE ──
+const S={
+  tags:[],
+  apiKey:'',
+  mode:'map',results:{},connections:[],analysis:'',running:false,
+  wallet:null,
+  records:JSON.parse(localStorage.getItem('cce_sol_records')||'[]')
+};
+const SOURCES=[
+  {id:'ddg',      name:'DuckDuckGo',      on:true, color:'#de5833',badge:'no track'},
+  {id:'wikimedia',name:'Wikipedia',        on:true, color:'#a0c8ff',badge:'open'},
+  {id:'archive',  name:'Internet Archive', on:true, color:'#43e8b0',badge:'archived'},
+  {id:'marginalia',name:'Marginalia',      on:true, color:'#b388ff',badge:'indie'},
+];
 const COLORS=['#6c63ff','#ff6584','#43e8b0','#ffb347','#00cfff','#ff8c42','#b388ff','#69f0ae'];
 
+// Load saved API key
+try{S.apiKey=sessionStorage.getItem('cce_key')||'';}catch(e){}
+
+// ── INIT ──
 function init(){
   renderSources();renderTags();updateKeyBtn();renderSolRecords();
+  // Check Phantom
+  setTimeout(checkPhantom, 800);
   document.getElementById('tag-input').addEventListener('keydown',e=>{
     if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(e.target.value);e.target.value='';}
     if(e.key==='Backspace'&&!e.target.value&&S.tags.length)removeTag(S.tags.length-1);
   });
-  document.getElementById('tag-input').addEventListener('blur',e=>{if(e.target.value.trim()){addTag(e.target.value);e.target.value='';}});
-  document.getElementById('main-search').addEventListener('keydown',e=>{if(e.key==='Enter')quickSearch();});
-  document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-}
-
-// WALLET
-async function connectWallet(){
-  if(S.wallet){S.wallet=null;updateWalletUI(false);log('Wallet disconnected');return;}
-  try{
-    if(window.solana?.isPhantom){
-      const r=await window.solana.connect();
-      S.wallet=r.publicKey.toString();
-    } else {
-      // Desktop/Electron mode — use configured wallet address
-      S.wallet='8jVNtUdHCzSqM1nfgkUn3Ub1sCV9CANw8JvNESFXQAsd';
-    }
-    updateWalletUI(true);
-    log(`✓ Phantom connected: ${S.wallet.slice(0,6)}...${S.wallet.slice(-4)}`);
-  }catch(e){log('Wallet error: '+e.message);}
-}
-function updateWalletUI(on){
-  document.getElementById('wallet-btn').classList.toggle('connected',on);
-  document.getElementById('wdot').classList.toggle('live',on);
-  document.getElementById('wlabel').textContent=on?S.wallet.slice(0,4)+'...'+S.wallet.slice(-4):'Connect Phantom';
-  if(S.connections.length>0)document.getElementById('save-sol-btn').classList.toggle('show',on);
-}
-
-// SAVE TO SOLANA
-async function saveToSolana(){
-  if(!S.wallet){await connectWallet();return;}
-  document.getElementById('tx-modal').classList.add('open');
-  document.getElementById('tx-sig').style.display='none';
-  document.getElementById('tx-close').style.display='none';
-  ['ico1','ico2','ico3','ico4'].forEach((id,i)=>{const el=document.getElementById(id);el.className='tx-ico wait';el.textContent=i+1;});
-  try{
-    setStep('ico1','active');
-    const payload=JSON.stringify({app:'CCE',v:'1.0',t:new Date().toISOString(),terms:S.tags,connections:S.connections.length,summary:S.analysis.slice(0,180),wallet:S.wallet});
-    await sleep(600);setStep('ico1','done');
-    setStep('ico2','active');
-    await sleep(800);setStep('ico2','done');
-    setStep('ico3','active');
-    let sig;
-    if(window.solana?.isPhantom&&typeof solanaWeb3!=='undefined'){
-      const conn=new solanaWeb3.Connection('https://api.mainnet-beta.solana.com','confirmed');
-      const pk=new solanaWeb3.PublicKey(S.wallet);
-      const MEMO=new solanaWeb3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
-      const tx=new solanaWeb3.Transaction();
-      tx.add(new solanaWeb3.TransactionInstruction({keys:[{pubkey:pk,isSigner:true,isWritable:false}],programId:MEMO,data:Buffer.from(payload,'utf-8')}));
-      const{blockhash}=await conn.getLatestBlockhash();
-      tx.recentBlockhash=blockhash;tx.feePayer=pk;
-      const signed=await window.solana.signAndSendTransaction(tx);
-      sig=signed.signature;
-    } else {
-      await sleep(1000);
-      // Generate demo signature for Electron mode
-      const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
-      sig=Array.from({length:88},()=>c[Math.floor(Math.random()*c.length)]).join('');
-    }
-    setStep('ico3','done');
-    setStep('ico4','active');
-    await sleep(1200);setStep('ico4','done');
-    const rec={id:Date.now(),terms:[...S.tags],connections:S.connections.length,sig,time:new Date().toISOString()};
-    S.records.unshift(rec);
-    localStorage.setItem('cce_sol_records',JSON.stringify(S.records.slice(0,50)));
-    renderSolRecords();
-    const url=`https://explorer.solana.com/tx/${sig}`;
-    const sigEl=document.getElementById('tx-sig');
-    sigEl.innerHTML=`✓ Saved! <a href="${url}" target="_blank">View on Solana Explorer →</a>`;
-    sigEl.style.display='block';
-    document.getElementById('tx-close').style.display='inline-block';
-    document.getElementById('onchain-link').href=url;
-    document.getElementById('onchain-badge').classList.add('show');
-    log(`✓ Investigation immortalized on Solana: ${sig.slice(0,16)}...`);
-  }catch(e){
-    log('Solana error: '+e.message);
-    document.getElementById('tx-sig').textContent='Error: '+e.message;
-    document.getElementById('tx-sig').style.display='block';
-    document.getElementById('tx-close').style.display='inline-block';
+  document.getElementById('tag-input').addEventListener('blur',e=>{
+    if(e.target.value.trim()){addTag(e.target.value);e.target.value='';}
+  });
+  document.getElementById('main-search').addEventListener('keydown',e=>{
+    if(e.key==='Enter')quickSearch();
+  });
+  document.querySelectorAll('.modal-overlay').forEach(m=>
+    m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');})
+  );
+  // Auto-reconnect if previously connected
+  if(window.solana && window.solana.isPhantom && window.solana.isConnected){
+    S.wallet=window.solana.publicKey?.toString();
+    if(S.wallet)updateWalletUI(true);
   }
 }
-function setStep(id,state){const el=document.getElementById(id);el.className='tx-ico '+state;el.textContent=state==='done'?'✓':el.textContent;}
+
+function checkPhantom(){
+  const pill=document.getElementById('phantom-status-pill');
+  if(window.solana && window.solana.isPhantom){
+    pill.textContent='Phantom: Ready ✓';
+    pill.className='brave-pill good';
+  } else {
+    pill.textContent='Phantom: Not detected';
+    pill.className='brave-pill warn';
+  }
+}
+
+// ── PHANTOM WALLET ──
+async function connectWallet(){
+  if(S.wallet){
+    try{if(window.solana && window.solana.disconnect)await window.solana.disconnect();}catch(e){}
+    S.wallet=null;updateWalletUI(false);
+    log('Wallet disconnected');return;
+  }
+  if(!window.solana || !window.solana.isPhantom){
+    document.getElementById('phantom-modal').classList.add('open');
+    return;
+  }
+  try{
+    document.getElementById('wallet-btn').classList.add('connecting');
+    document.getElementById('wlabel').textContent='Connecting...';
+    const resp=await window.solana.connect();
+    S.wallet=resp.publicKey.toString();
+    updateWalletUI(true);
+    log(`✓ Phantom connected: ${S.wallet.slice(0,6)}...${S.wallet.slice(-4)}`);
+    checkPhantom();
+  }catch(e){
+    document.getElementById('wallet-btn').classList.remove('connecting');
+    document.getElementById('wlabel').textContent='Connect Phantom';
+    log('Wallet error: '+e.message);
+  }
+}
+
+function updateWalletUI(on){
+  const btn=document.getElementById('wallet-btn');
+  btn.classList.remove('connecting');
+  btn.classList.toggle('connected',on);
+  document.getElementById('wdot').classList.toggle('live',on);
+  document.getElementById('wlabel').textContent=on
+    ?`${S.wallet.slice(0,4)}...${S.wallet.slice(-4)}`
+    :'Connect Phantom';
+  if(S.connections.length>0){
+    document.getElementById('save-sol-btn').classList.add('show');
+    document.getElementById('no-wallet-hint').classList.remove('show');
+  }
+}
+
+// ── SAVE TO SOLANA (REAL TRANSACTION) ──
+async function saveToSolana(){
+  if(!S.wallet){
+    if(!window.solana || !window.solana.isPhantom){document.getElementById('phantom-modal').classList.add('open');return;}
+    await connectWallet();
+    if(!S.wallet)return;
+  }
+  // Reset modal
+  document.getElementById('tx-modal').classList.add('open');
+  document.getElementById('tx-result').className='';
+  document.getElementById('tx-result').innerHTML='';
+  document.getElementById('tx-result').style.display='none';
+  document.getElementById('tx-close').style.display='none';
+  ['ico1','ico2','ico3','ico4'].forEach((id,i)=>{
+    const el=document.getElementById(id);el.className='tx-ico wait';el.textContent=i+1;
+  });
+
+  try{
+    // Step 1 — Prepare
+    setStep(1,'active');
+    const payload=JSON.stringify({
+      app:'CCE',version:'1.0',
+      timestamp:new Date().toISOString(),
+      terms:S.tags,
+      connectionCount:S.connections.length,
+      summary:S.analysis.slice(0,200),
+      wallet:S.wallet,
+      source:'Brave+Solana'
+    });
+    await sleep(500);
+    setStep(1,'done');
+
+    // Step 2 — Connect to network
+    setStep(2,'active');
+    const connection=new solanaWeb3.Connection(
+      solanaWeb3.clusterApiUrl('mainnet-beta'),
+      'confirmed'
+    );
+    const{blockhash,lastValidBlockHeight}=await connection.getLatestBlockhash();
+    setStep(2,'done');
+
+    // Step 3 — Sign with Phantom
+    setStep(3,'active');
+    const fromPubkey=new solanaWeb3.PublicKey(S.wallet);
+    const MEMO_PROGRAM=new solanaWeb3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+    const tx=new solanaWeb3.Transaction({
+      recentBlockhash:blockhash,
+      feePayer:fromPubkey,
+      lastValidBlockHeight
+    });
+    tx.add(new solanaWeb3.TransactionInstruction({
+      keys:[{pubkey:fromPubkey,isSigner:true,isWritable:false}],
+      programId:MEMO_PROGRAM,
+      data:Buffer.from(payload,'utf-8')
+    }));
+
+    // This opens Phantom popup for user to approve
+    const{signature}=await window.solana.signAndSendTransaction(tx);
+    setStep(3,'done');
+
+    // Step 4 — Confirm
+    setStep(4,'active');
+    await connection.confirmTransaction({
+      signature,blockhash,lastValidBlockHeight
+    },'confirmed');
+    setStep(4,'done');
+
+    // Save locally
+    const record={
+      id:Date.now(),terms:[...S.tags],
+      connections:S.connections.length,
+      sig:signature,
+      time:new Date().toISOString(),
+      wallet:S.wallet
+    };
+    S.records.unshift(record);
+    localStorage.setItem('cce_sol_records',JSON.stringify(S.records.slice(0,100)));
+    renderSolRecords();
+
+    // Show success
+    const explorerUrl=`https://explorer.solana.com/tx/${signature}`;
+    const result=document.getElementById('tx-result');
+    result.innerHTML=`<div class="tx-success">
+      <div class="tx-success-title">✓ INVESTIGATION IMMORTALIZED ON SOLANA</div>
+      <a class="tx-sig-link" href="${explorerUrl}" target="_blank">◎ ${signature} → View on Explorer</a>
+    </div>`;
+    result.className='show';result.style.display='block';
+    document.getElementById('tx-close').style.display='inline-block';
+    document.getElementById('onchain-link').href=explorerUrl;
+    document.getElementById('onchain-badge').classList.add('show');
+    document.getElementById('no-wallet-hint').classList.remove('show');
+    log(`◎ Investigation immortalized · tx: ${signature.slice(0,20)}...`);
+    document.getElementById('log-text').className='log-sol';
+
+  }catch(e){
+    const result=document.getElementById('tx-result');
+    result.innerHTML=`<div class="tx-error">Error: ${esc(e.message)}<br><br>Make sure you have SOL in your wallet for the transaction fee (~0.000005 SOL).</div>`;
+    result.className='show';result.style.display='block';
+    document.getElementById('tx-close').style.display='inline-block';
+    log('Solana error: '+e.message);
+  }
+}
+
+function setStep(n,state){
+  const el=document.getElementById('ico'+n);
+  el.className='tx-ico '+state;
+  el.textContent=state==='done'?'✓':n;
+}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 
 function renderSolRecords(){
   const el=document.getElementById('sol-records');
-  if(!S.records.length){el.innerHTML='<div class="no-records">No investigations saved on-chain yet.<br><br>Run a search, then click<br>◎ SAVE INVESTIGATION ON-CHAIN</div>';return;}
+  if(!S.records.length){
+    el.innerHTML=`<div class="no-records">No investigations saved on-chain yet.<br><br>Connect Phantom → Run a search<br>→ Click ◎ SAVE INVESTIGATION ON-CHAIN<br><br>Your research becomes permanent.</div>`;
+    return;
+  }
   el.innerHTML=S.records.map(r=>`
     <div class="sol-record">
       <div class="sol-record-terms">${r.terms.map(esc).join(' · ')}</div>
       <div class="sol-record-meta">${r.connections} connections · ${new Date(r.time).toLocaleString()}</div>
-      <a class="sol-record-link" href="https://explorer.solana.com/tx/${r.sig}" target="_blank">◎ ${r.sig.slice(0,28)}... → Explorer</a>
+      <a class="sol-record-link" href="https://explorer.solana.com/tx/${r.sig}" target="_blank">
+        ◎ ${r.sig.slice(0,32)}... → Solana Explorer
+      </a>
     </div>`).join('');
 }
 
-// SOURCES
+// ── SOURCES ──
 function renderSources(){
   document.getElementById('source-list').innerHTML=SOURCES.map((s,i)=>`
     <div class="source-row">
       <div style="display:flex;align-items:center;gap:6px">
-        <div class="sdot" style="background:${s.on?s.color:'var(--dim)'}"></div>
-        <span class="source-name">${s.name}</span><span class="source-badge">${s.badge}</span>
+        <div class="sdot" style="background:${s.on?s.color:'var(--dim)'};${s.on?`box-shadow:0 0 4px ${s.color}`:''}"></div>
+        <span class="source-name">${s.name}</span>
+        <span class="source-badge">${s.badge}</span>
       </div>
       <button class="stoggle" onclick="toggleSrc(${i})">
-        <svg width="28" height="16" viewBox="0 0 28 16"><rect x="1" y="2" width="26" height="12" rx="6" fill="${s.on?s.color:'#1e1e32'}" opacity="${s.on?.5:1}"/><circle cx="${s.on?20:8}" cy="8" r="6" fill="${s.on?s.color:'#3a384e'}"/></svg>
+        <svg width="28" height="16" viewBox="0 0 28 16">
+          <rect x="1" y="2" width="26" height="12" rx="6" fill="${s.on?s.color:'#1e1e32'}" opacity="${s.on?0.5:1}"/>
+          <circle cx="${s.on?20:8}" cy="8" r="6" fill="${s.on?s.color:'#3a384e'}"/>
+        </svg>
       </button>
     </div>`).join('');
 }
 function toggleSrc(i){SOURCES[i].on=!SOURCES[i].on;renderSources();}
 
-// TAGS
-function addTag(v){v=v.trim().replace(/,$/,'').trim();if(!v||S.tags.includes(v)||S.tags.length>=8)return;S.tags.push(v);renderTags();}
+// ── TAGS ──
+function addTag(v){
+  v=v.trim().replace(/,$/,'').trim();
+  if(!v||S.tags.includes(v)||S.tags.length>=8)return;
+  S.tags.push(v);renderTags();
+}
 function removeTag(i){S.tags.splice(i,1);renderTags();}
 function renderTags(){
-  document.getElementById('tags-wrap').innerHTML=S.tags.map((t,i)=>`<div class="tag" style="border-color:${COLORS[i%COLORS.length]}44;color:${COLORS[i%COLORS.length]}"><span>${esc(t)}</span><button class="tag-x" onclick="removeTag(${i})">×</button></div>`).join('');
+  document.getElementById('tags-wrap').innerHTML=S.tags.map((t,i)=>`
+    <div class="tag" style="border-color:${COLORS[i%COLORS.length]}44;color:${COLORS[i%COLORS.length]}">
+      <span>${esc(t)}</span>
+      <button class="tag-x" onclick="removeTag(${i})">×</button>
+    </div>`).join('');
   document.getElementById('go-btn').disabled=S.tags.length<2;
 }
 
-// SEARCH
+// ── SEARCH ──
 async function bSearch(query,sources){
   const all=[],q=encodeURIComponent(query);
-  if(sources.includes('ddg')){try{const r=await fetch(`https://api.duckduckgo.com/?q=${q}&format=json&no_redirect=1&no_html=1`);const d=await r.json();if(d.AbstractText)all.push({title:d.Heading||query,url:d.AbstractURL||'',snippet:d.AbstractText,source:'DuckDuckGo'});(d.RelatedTopics||[]).slice(0,5).forEach(t=>{if(t.Text&&t.FirstURL)all.push({title:t.Text.slice(0,60),url:t.FirstURL,snippet:t.Text,source:'DuckDuckGo'});});}catch{}}
-  if(sources.includes('wikimedia')){try{const r=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*&srlimit=5`);const d=await r.json();(d.query?.search||[]).forEach(s=>all.push({title:s.title,url:`https://en.wikipedia.org/wiki/${encodeURIComponent(s.title.replace(/ /g,'_'))}`,snippet:s.snippet.replace(/<[^>]+>/g,''),source:'Wikipedia'}));}catch{}}
-  if(sources.includes('archive')){try{const r=await fetch(`https://archive.org/advancedsearch.php?q=${q}&fl[]=identifier,title,description&rows=5&output=json`);const d=await r.json();(d.response?.docs||[]).forEach(s=>all.push({title:s.title||s.identifier,url:`https://archive.org/details/${s.identifier}`,snippet:(s.description||'').slice(0,200),source:'Internet Archive'}));}catch{}}
+  if(sources.includes('ddg')){
+    try{
+      const r=await fetch(`https://api.duckduckgo.com/?q=${q}&format=json&no_redirect=1&no_html=1`);
+      const d=await r.json();
+      if(d.AbstractText)all.push({title:d.Heading||query,url:d.AbstractURL||'',snippet:d.AbstractText,source:'DuckDuckGo'});
+      (d.RelatedTopics||[]).slice(0,5).forEach(t=>{
+        if(t.Text&&t.FirstURL)all.push({title:t.Text.slice(0,60),url:t.FirstURL,snippet:t.Text,source:'DuckDuckGo'});
+      });
+    }catch(e){}
+  }
+  if(sources.includes('wikimedia')){
+    try{
+      const r=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${q}&format=json&origin=*&srlimit=5`);
+      const d=await r.json();
+      (d.query && d.query.search||[]).forEach(s=>all.push({
+        title:s.title,
+        url:`https://en.wikipedia.org/wiki/${encodeURIComponent(s.title.replace(/ /g,'_'))}`,
+        snippet:s.snippet.replace(/<[^>]+>/g,''),
+        source:'Wikipedia'
+      }));
+    }catch(e){}
+  }
+  if(sources.includes('archive')){
+    try{
+      const r=await fetch(`https://archive.org/advancedsearch.php?q=${q}&fl[]=identifier,title,description&rows=5&output=json`);
+      const d=await r.json();
+      (d.response?.docs||[]).forEach(s=>all.push({
+        title:s.title||s.identifier,
+        url:`https://archive.org/details/${s.identifier}`,
+        snippet:(s.description||'').slice(0,200),
+        source:'Internet Archive'
+      }));
+    }catch(e){}
+  }
   return all;
 }
 
-// MAIN
+// ── MAIN ENGINE ──
 async function runAll(){
   if(S.tags.length<2||S.running)return;
   if(!S.apiKey){openKeyModal();return;}
   S.running=true;setBusy(true);
-  const btn=document.getElementById('go-btn');btn.classList.add('loading');btn.disabled=true;
+  const btn=document.getElementById('go-btn');
+  btn.classList.add('loading');btn.disabled=true;
+  document.getElementById('log-text').className='';
+
   try{
     const onSrc=SOURCES.filter(s=>s.on).map(s=>s.id);
     const allR={};
-    for(const term of S.tags){btn.textContent=`SCANNING: ${term.toUpperCase().slice(0,10)}...`;log(`Searching: "${term}"`);allR[term]=await bSearch(term,onSrc);log(`✓ "${term}" — ${allR[term].length} results`);}
-    S.results=allR;renderResultsList(allR);renderSrcPanel(allR);
-    document.getElementById('result-count').textContent=`(${Object.values(allR).reduce((a,r)=>a+r.length,0)})`;
-    btn.textContent='CONNECTING DOTS...';log('AI connection engine running...');
+    for(const term of S.tags){
+      btn.textContent=`SCANNING: ${term.toUpperCase().slice(0,10)}...`;
+      log(`Querying sources: "${term}"`);
+      allR[term]=await bSearch(term,onSrc);
+      log(`✓ "${term}" — ${allR[term].length} results from ${onSrc.length} sources`);
+    }
+    S.results=allR;
+    renderResultsList(allR);
+    renderSrcPanel(allR);
+    const total=Object.values(allR).reduce((a,r)=>a+r.length,0);
+    document.getElementById('result-count').textContent=`(${total})`;
+
+    btn.textContent='CONNECTING DOTS...';
+    log('AI connection engine analyzing...');
     const parsed=await aiAnalyze(S.tags,allR);
-    S.connections=parsed.connections;S.analysis=parsed.analysis;
-    renderGraph(S.tags,parsed.connections);renderAnalysis(S.tags,parsed.connections,parsed.analysis);
+    S.connections=parsed.connections;
+    S.analysis=parsed.analysis;
+
+    renderGraph(S.tags,parsed.connections);
+    renderAnalysis(S.tags,parsed.connections,parsed.analysis);
     switchTab('graph');
+
+    // Show save button
     document.getElementById('save-sol-btn').classList.add('show');
-    log(`✓ ${parsed.connections.length} connections mapped · Click ◎ to save on Solana`);
-  }catch(e){log('ERROR: '+e.message);}
-  finally{S.running=false;setBusy(false);btn.classList.remove('loading');btn.textContent='CONNECT THE DOTS';btn.disabled=false;}
-}
-async function quickSearch(){const v=document.getElementById('main-search').value.trim();if(!v)return;v.split(/[,;]+/).map(t=>t.trim()).filter(Boolean).slice(0,8).forEach(addTag);document.getElementById('main-search').value='';if(S.tags.length>=2)await runAll();}
+    if(!S.wallet){
+      document.getElementById('no-wallet-hint').classList.add('show');
+    }
+    log(`✓ ${parsed.connections.length} connections mapped · ${S.wallet?'Click ◎ to save on Solana':'Connect Phantom to save on-chain'}`);
 
-// AI
+  }catch(e){
+    log('ERROR: '+e.message);
+    console.error(e);
+  }finally{
+    S.running=false;setBusy(false);
+    btn.classList.remove('loading');
+    btn.textContent='CONNECT THE DOTS';
+    btn.disabled=false;
+  }
+}
+
+async function quickSearch(){
+  const v=document.getElementById('main-search').value.trim();
+  if(!v)return;
+  v.split(/[,;]+/).map(t=>t.trim()).filter(Boolean).slice(0,8).forEach(addTag);
+  document.getElementById('main-search').value='';
+  if(S.tags.length>=2)await runAll();
+}
+
+// ── AI ──
 async function aiAnalyze(terms,results){
-  const depth=document.getElementById('depth').value,tone=document.getElementById('tone').value;
-  const dM={surface:'Find 2-3 well-documented factual connections.',deep:'Uncover 3-5 connections including lesser-known links, shared associates, timeline overlaps, and circumstantial ties.',rabbit:'Go deep — 4-6 connections: obscure historical links, financial trails, geographic overlaps, secret society ties, declassified documents, speculative conspiratorial threads.'};
-  const tM={analytical:'Be precise and measured. Stick to facts.',conspiratorial:'Lean into the mystery. Treat coincidences as meaningful. Find the hidden hand.',journalistic:'Write like an investigative journalist. Follow the money. Name names and dates.'};
-  const snippets=Object.entries(results).map(([t,rs])=>`TERM: "${t}"\n${rs.slice(0,4).map(r=>`  • ${r.title}: ${(r.snippet||'').slice(0,160)}`).join('\n')}`).join('\n\n');
-  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':S.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:`You are the CCE — Conspiracy Connection Engine on Solana. Investigate: ${terms.map((t,i)=>`[${i}] ${t}`).join(', ')}.\n\nSearch data:\n${snippets}\n\n${dM[depth]} ${tM[tone]}\n\nReturn ONLY valid JSON:\n{"connections":[{"title":"...","from":0,"to":1,"strength":0.85,"label":"2 words","description":"3-4 sentences"}],"analysis":"200-300 word synthesis"}`}]})});
+  const depth=document.getElementById('depth').value;
+  const tone=document.getElementById('tone').value;
+  const dM={
+    surface:'Find 2-3 well-documented factual connections between these terms.',
+    deep:'Uncover 3-5 connections including lesser-known links, shared associates, timeline overlaps, and circumstantial ties.',
+    rabbit:'Go deep — 4-6 connections: obscure historical links, financial trails, geographic overlaps, secret society ties, declassified documents, and speculative conspiratorial threads.'
+  };
+  const tM={
+    analytical:'Be precise and measured. Stick to documented facts, label speculation clearly.',
+    conspiratorial:'Lean into the mystery. Use evocative language. Treat coincidences as meaningful. Find the hidden hand behind events.',
+    journalistic:'Write like an investigative journalist. Follow the money and the power. Name dates, documents, and patterns.'
+  };
+  const snippets=Object.entries(results).map(([t,rs])=>
+    `TERM: "${t}"\n${rs.slice(0,4).map(r=>`  • ${r.title}: ${(r.snippet||'').slice(0,160)}`).join('\n')}`
+  ).join('\n\n');
+
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':S.apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1500,
+      messages:[{role:'user',content:`You are the CCE — Conspiracy Connection Engine, running on Brave Browser with Solana blockchain integration. Investigate hidden connections between: ${terms.map((t,i)=>`[${i}] ${t}`).join(', ')}.
+
+Search data gathered from uncensored alternative sources (no Google):
+${snippets}
+
+${dM[depth]} ${tM[tone]}
+
+Return ONLY valid JSON — no markdown, no preamble:
+{
+  "connections": [{"title":"5-8 word title","from":0,"to":1,"strength":0.85,"label":"2 words","description":"3-4 specific sentences drawing on the search data"}],
+  "analysis": "200-300 word deep synthesis weaving all terms together"
+}`}]
+    })
+  });
   const data=await res.json();
-  return JSON.parse((data.content?.find(b=>b.type==='text')?.text||'').replace(/\`\`\`json|\`\`\`/g,'').trim());
+  const raw=data.content && data.content.find(b=>b.type==='text')?.text||'';
+  return JSON.parse(raw.replace(/```json|```/g,'').trim());
 }
 
-// GRAPH
+// ── GRAPH ──
 function renderGraph(nodes,edges){
-  const panel=document.getElementById('graph-panel'),svg=document.getElementById('graph-svg'),empty=document.getElementById('graph-empty');
-  const W=panel.clientWidth||800,H=panel.clientHeight||560,cx=W/2,cy=H/2,n=nodes.length;
-  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.style.display='block';empty.style.display='none';svg.innerHTML='';
+  const panel=document.getElementById('graph-panel');
+  const svg=document.getElementById('graph-svg');
+  const empty=document.getElementById('graph-empty');
+  const W=panel.clientWidth||900,H=panel.clientHeight||580;
+  const cx=W/2,cy=H/2,n=nodes.length;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.style.display='block';empty.style.display='none';
+  svg.innerHTML='';
+
   const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-  defs.innerHTML='<pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M 36 0 L 0 0 0 36" fill="none" stroke="#14142a" stroke-width="0.5"/></pattern>';
-  svg.appendChild(defs);svg.appendChild(mkS('rect',{width:W,height:H,fill:'url(#grid)'}));
-  const pos=nodes.map((_,i)=>{if(n===2)return i===0?{x:W*.28,y:cy}:{x:W*.72,y:cy};if(n===3){const a=(2*Math.PI*i/3)-Math.PI/2;return{x:cx+150*Math.cos(a),y:cy+120*Math.sin(a)};}const a=(2*Math.PI*i/n)-Math.PI/2,r=Math.min(cx,cy)*.56;return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};});
-  edges.forEach(e=>{const a=pos[e.from],b=pos[e.to];if(!a||!b)return;const s=e.strength||.5,c=COLORS[e.from%COLORS.length];
-    svg.appendChild(mkS('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,'stroke-width':s*10,'stroke-opacity':.07}));
-    svg.appendChild(mkS('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,'stroke-width':0.5+s*2,'stroke-opacity':0.25+s*.55,'stroke-dasharray':s>.65?'none':'5 3'}));
-    if(e.label){const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,lw=e.label.length*6.5+14;svg.appendChild(mkS('rect',{x:mx-lw/2,y:my-9,width:lw,height:18,rx:3,fill:'#0e0e1a',stroke:c,'stroke-width':.5,'stroke-opacity':.5}));const lt=mkS('text',{x:mx,y:my,'text-anchor':'middle','dominant-baseline':'central','font-size':9,fill:c,opacity:.85,'font-family':'"Share Tech Mono",monospace'});lt.textContent=e.label;svg.appendChild(lt);}
+  defs.innerHTML=`
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#14142a" stroke-width="0.5"/>
+    </pattern>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>`;
+  svg.appendChild(defs);
+  svg.appendChild(mkS('rect',{width:W,height:H,fill:'url(#grid)'}));
+
+  const pos=nodes.map((_,i)=>{
+    if(n===2)return i===0?{x:W*.27,y:cy}:{x:W*.73,y:cy};
+    if(n===3){const a=(2*Math.PI*i/3)-Math.PI/2;return{x:cx+155*Math.cos(a),y:cy+125*Math.sin(a)};}
+    const a=(2*Math.PI*i/n)-Math.PI/2,r=Math.min(cx,cy)*.57;
+    return{x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};
   });
-  nodes.forEach((node,i)=>{const{x,y}=pos[i],c=COLORS[i%COLORS.length],r=40;
-    svg.appendChild(mkS('circle',{cx:x,cy:y,r:r+10,fill:c,'fill-opacity':.04}));
-    svg.appendChild(mkS('circle',{cx:x,cy:y,r,fill:'#0e0e1a',stroke:c,'stroke-width':1.5}));
+
+  // Draw edges
+  edges.forEach(e=>{
+    const a=pos[e.from],b=pos[e.to];
+    if(!a||!b)return;
+    const s=e.strength||.5,c=COLORS[e.from%COLORS.length];
+    // Glow
+    svg.appendChild(mkS('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,'stroke-width':s*12,'stroke-opacity':.06}));
+    // Main line
+    svg.appendChild(mkS('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,'stroke-width':0.5+s*2.2,'stroke-opacity':0.2+s*.6,'stroke-dasharray':s>.7?'none':'5 3'}));
+    // Edge label
+    if(e.label){
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,lw=e.label.length*6.5+16;
+      svg.appendChild(mkS('rect',{x:mx-lw/2,y:my-9,width:lw,height:18,rx:3,fill:'#0e0e1a',stroke:c,'stroke-width':.5,'stroke-opacity':.6}));
+      const lt=mkS('text',{x:mx,y:my,'text-anchor':'middle','dominant-baseline':'central','font-size':9,fill:c,opacity:.9,'font-family':'"Share Tech Mono",monospace'});
+      lt.textContent=e.label;svg.appendChild(lt);
+    }
+  });
+
+  // Draw nodes
+  nodes.forEach((node,i)=>{
+    const{x,y}=pos[i],c=COLORS[i%COLORS.length],r=42;
+    // Outer glow
+    svg.appendChild(mkS('circle',{cx:x,cy:y,r:r+14,fill:c,'fill-opacity':.04}));
+    svg.appendChild(mkS('circle',{cx:x,cy:y,r:r+7,fill:c,'fill-opacity':.04}));
+    // Node
+    svg.appendChild(mkS('circle',{cx:x,cy:y,r,fill:'#0a0a14',stroke:c,'stroke-width':1.5}));
     svg.appendChild(mkS('circle',{cx:x,cy:y,r:r-2,fill:c,'fill-opacity':.07}));
-    svg.appendChild(mkS('circle',{cx:x+r-8,cy:y-r+8,r:11,fill:c,'fill-opacity':.9}));
-    const num=mkS('text',{x:x+r-8,y:y-r+8,'text-anchor':'middle','dominant-baseline':'central','font-size':9,fill:'#fff','font-weight':700,'font-family':'"Syne",sans-serif'});num.textContent=i+1;svg.appendChild(num);
+    // Index badge
+    svg.appendChild(mkS('circle',{cx:x+r-9,cy:y-r+9,r:12,fill:c,'fill-opacity':.95}));
+    const num=mkS('text',{x:x+r-9,y:y-r+9,'text-anchor':'middle','dominant-baseline':'central','font-size':10,fill:'#fff','font-weight':800,'font-family':'"Syne",sans-serif'});
+    num.textContent=i+1;svg.appendChild(num);
+    // Label
     const words=node.split(' '),lines=[];let cur='';
-    words.forEach(w=>{const t=cur?cur+' '+w:w;if(t.length*6.5>(r*2-16)&&cur){lines.push(cur);cur=w;}else cur=t;});if(cur)lines.push(cur);
-    const lh=13,th=lines.length*lh;
-    lines.forEach((ln,li)=>{const t=mkS('text',{x,y:y-th/2+li*lh+lh/2,'text-anchor':'middle','dominant-baseline':'central','font-size':10,'font-weight':700,fill:c,'font-family':'"Syne",sans-serif'});t.textContent=ln.length>13?ln.slice(0,11)+'…':ln;svg.appendChild(t);});
+    words.forEach(w=>{const t=cur?cur+' '+w:w;if(t.length*6.2>(r*2-18)&&cur){lines.push(cur);cur=w;}else cur=t;});
+    if(cur)lines.push(cur);
+    const lh=14,th=lines.length*lh;
+    lines.forEach((ln,li)=>{
+      const t=mkS('text',{x,y:y-th/2+li*lh+lh/2,'text-anchor':'middle','dominant-baseline':'central','font-size':10,'font-weight':700,fill:c,'font-family':'"Syne",sans-serif'});
+      t.textContent=ln.length>13?ln.slice(0,11)+'…':ln;svg.appendChild(t);
+    });
   });
 }
 
-// RENDER ANALYSIS
+// ── RENDER ANALYSIS ──
 function renderAnalysis(nodes,connections,analysis){
   document.getElementById('analysis-empty').style.display='none';
-  const c=document.getElementById('analysis-content');c.style.display='block';
-  c.innerHTML=`<div class="analysis-title">Connection Analysis</div><div class="analysis-meta">${nodes.length} terms · ${connections.length} connections · ${new Date().toLocaleTimeString()}</div>${connections.map((cn,i)=>{const from=nodes[cn.from]||'?',to=nodes[cn.to]||'?',pct=Math.round((cn.strength||.5)*100),col=COLORS[cn.from%COLORS.length];return`<div class="connection-card fade-up" style="animation-delay:${i*60}ms"><style>.connection-card:nth-child(${i+3})::before{background:${col}}</style><div class="card-nodes"><span class="node-pill" style="border-color:${COLORS[cn.from%COLORS.length]}55;color:${COLORS[cn.from%COLORS.length]}">${esc(from)}</span><span class="arrow">⟶</span><span class="node-pill" style="border-color:${COLORS[cn.to%COLORS.length]}55;color:${COLORS[cn.to%COLORS.length]}">${esc(to)}</span></div><div class="card-title">${esc(cn.title)}</div><div class="card-body">${esc(cn.description)}</div><div class="strength-row"><span class="strength-label">strength</span><div class="strength-track"><div class="strength-bar" style="width:${pct}%;background:${col}"></div></div><span class="strength-pct">${pct}%</span></div></div>`;}).join('')}<div style="margin-top:18px"><div class="sec-label" style="padding:0;margin-bottom:8px">Deep Synthesis</div><div class="deep-block fade-up"><p>${esc(analysis)}</p></div></div>`;
+  const c=document.getElementById('analysis-content');
+  c.style.display='block';
+  c.innerHTML=`
+    <div class="analysis-title">Connection Analysis</div>
+    <div class="analysis-meta">${nodes.length} terms · ${connections.length} connections · ${new Date().toLocaleTimeString()} · sources: DuckDuckGo, Wikipedia, Archive.org</div>
+    ${connections.map((cn,i)=>{
+      const from=nodes[cn.from]||'?',to=nodes[cn.to]||'?';
+      const pct=Math.round((cn.strength||.5)*100),col=COLORS[cn.from%COLORS.length];
+      return `<div class="connection-card fade-up" style="animation-delay:${i*70}ms">
+        <style>.connection-card:nth-child(${i+3})::before{background:${col}}</style>
+        <div class="card-nodes">
+          <span class="node-pill" style="border-color:${COLORS[cn.from%COLORS.length]}55;color:${COLORS[cn.from%COLORS.length]}">${esc(from)}</span>
+          <span class="arrow">⟶</span>
+          <span class="node-pill" style="border-color:${COLORS[cn.to%COLORS.length]}55;color:${COLORS[cn.to%COLORS.length]}">${esc(to)}</span>
+        </div>
+        <div class="card-title">${esc(cn.title)}</div>
+        <div class="card-body">${esc(cn.description)}</div>
+        <div class="strength-row">
+          <span class="strength-label">strength</span>
+          <div class="strength-track"><div class="strength-bar" style="width:${pct}%;background:${col}"></div></div>
+          <span class="strength-pct">${pct}%</span>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:18px">
+      <div class="sec-label" style="padding:0;margin-bottom:8px">Deep Synthesis</div>
+      <div class="deep-block fade-up"><p>${esc(analysis)}</p></div>
+    </div>`;
 }
 
-// RENDER SOURCES
+// ── RENDER SOURCES PANEL ──
 function renderSrcPanel(results){
   document.getElementById('sources-empty').style.display='none';
   const c=document.getElementById('sources-content');c.style.display='block';
-  c.innerHTML=Object.entries(results).map(([term,rs])=>`<div style="margin-bottom:20px"><div class="srg-header">Term: ${esc(term)} — ${rs.length} results</div>${rs.slice(0,8).map(r=>`<div class="sr-item"><div class="sr-title">${esc(r.title)}</div><div class="sr-url" style="color:${srcCol(r.source)}">${r.source} · ${esc(r.url?.slice(0,60)||'')}</div><div class="sr-snippet">${esc((r.snippet||'').slice(0,250))}</div></div>`).join('')}</div>`).join('');
+  c.innerHTML=Object.entries(results).map(([term,rs])=>`
+    <div style="margin-bottom:20px">
+      <div class="srg-header">Term: ${esc(term)} — ${rs.length} results</div>
+      ${rs.slice(0,10).map(r=>`
+        <div class="sr-item">
+          <div class="sr-title">${esc(r.title)}</div>
+          <div class="sr-url" style="color:${srcCol(r.source)}">${r.source} · ${esc((r.url||'').slice(0,65))}</div>
+          <div class="sr-snippet">${esc((r.snippet||'').slice(0,280))}</div>
+        </div>`).join('')}
+    </div>`).join('');
 }
+
 function renderResultsList(results){
   const all=Object.entries(results).flatMap(([term,rs])=>rs.map(r=>({...r,term})));
-  document.getElementById('results-list').innerHTML=all.slice(0,50).map((r,i)=>`<div class="result-item fade-up" style="animation-delay:${i*12}ms"><div class="result-source" style="color:${srcCol(r.source)}">${r.source} · ${esc(r.term)}</div><div class="result-title">${esc(r.title)}</div><div class="result-snippet">${esc((r.snippet||'').slice(0,90))}</div></div>`).join('');
+  document.getElementById('results-list').innerHTML=all.slice(0,60).map((r,i)=>`
+    <div class="result-item fade-up" style="animation-delay:${i*10}ms">
+      <div class="result-source" style="color:${srcCol(r.source)}">${r.source} · ${esc(r.term)}</div>
+      <div class="result-title">${esc(r.title)}</div>
+      <div class="result-snippet">${esc((r.snippet||'').slice(0,95))}</div>
+    </div>`).join('');
 }
 function srcCol(s){return({'DuckDuckGo':'#de5833','Wikipedia':'#a0c8ff','Internet Archive':'#43e8b0','Marginalia':'#b388ff'})[s]||'#6c63ff';}
 
-// UI HELPERS
-function switchTab(id){document.querySelectorAll('.vtab').forEach((t,i)=>t.classList.toggle('active',['graph','analysis','sources','solana'][i]===id));document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));document.getElementById(id+'-panel').classList.add('active');}
-function switchMode(m){S.mode=m;document.getElementById('map-btn').classList.toggle('active',m==='map');document.getElementById('dive-btn').classList.toggle('active',m==='dive');}
+// ── UI HELPERS ──
+function switchTab(id){
+  document.querySelectorAll('.vtab').forEach((t,i)=>t.classList.toggle('active',['graph','analysis','sources','solana'][i]===id));
+  document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id+'-panel').classList.add('active');
+}
+function switchMode(m){
+  S.mode=m;
+  document.getElementById('map-btn').classList.toggle('active',m==='map');
+  document.getElementById('dive-btn').classList.toggle('active',m==='dive');
+  if(m==='dive'){
+    document.getElementById('depth').value='rabbit';
+    document.getElementById('tone').value='conspiratorial';
+  } else {
+    document.getElementById('depth').value='deep';
+  }
+  log(m==='dive'?'Deep Dive mode — rabbit hole activated':'Map mode');
+}
 function setBusy(b){document.getElementById('status-indicator').classList.toggle('busy',b);}
 function log(msg){document.getElementById('log-text').textContent='// '+msg;}
-function openKeyModal(){document.getElementById('key-input').value=S.apiKey;document.getElementById('key-modal').classList.add('open');setTimeout(()=>document.getElementById('key-input').focus(),60);}
+function openKeyModal(){
+  document.getElementById('key-input').value=S.apiKey;
+  document.getElementById('key-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('key-input').focus(),60);
+}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
-function saveKey(){const k=document.getElementById('key-input').value.trim();S.apiKey=k;try{if(k)sessionStorage.setItem('cce_key',k);}catch{}updateKeyBtn();closeModal('key-modal');log(k?'✓ API key saved':'API key cleared');}
-function updateKeyBtn(){const b=document.getElementById('key-btn');b.classList.toggle('set',!!S.apiKey);b.textContent=S.apiKey?'⚿ KEY SET':'⚿ API KEY';}
+function saveKey(){
+  const k=document.getElementById('key-input').value.trim();
+  S.apiKey=k;
+  try{if(k)sessionStorage.setItem('cce_key',k);}catch(e){}
+  updateKeyBtn();closeModal('key-modal');
+  log(k?'✓ API key saved for this session':'API key cleared');
+}
+function updateKeyBtn(){
+  const b=document.getElementById('key-btn');
+  b.classList.toggle('set',!!S.apiKey);
+  b.textContent=S.apiKey?'⚿ KEY SET':'⚿ API KEY';
+}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function mkS(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el;}
+function mkS(tag,attrs){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+  return el;
+}
 
 init();
 </script>
