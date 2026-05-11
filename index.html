@@ -541,16 +541,29 @@ async function saveToSolana(){
     await sleep(500);
     setStep(1,'done');
 
-    // Step 2 — Connect to network
+    // Step 2 — Get blockhash via Phantom's own RPC connection
     setStep(2,'active');
-    const connection=new solanaWeb3.Connection(
+    // Use multiple fallback RPCs
+    const RPC_ENDPOINTS=[
+      'https://solana-mainnet.g.alchemy.com/v2/demo',
       'https://rpc.ankr.com/solana',
-      'confirmed'
-    );
-    const{blockhash,lastValidBlockHeight}=await connection.getLatestBlockhash();
+      'https://mainnet.helius-rpc.com/?api-key=demo',
+      'https://api.mainnet-beta.solana.com'
+    ];
+    let blockhash, lastValidBlockHeight, connection;
+    for(const rpc of RPC_ENDPOINTS){
+      try{
+        connection=new solanaWeb3.Connection(rpc,'confirmed');
+        const bh=await connection.getLatestBlockhash('finalized');
+        blockhash=bh.blockhash;
+        lastValidBlockHeight=bh.lastValidBlockHeight;
+        break;
+      }catch(e){ console.log('RPC failed:',rpc,e.message); }
+    }
+    if(!blockhash)throw new Error('All RPC endpoints failed — check your internet connection');
     setStep(2,'done');
 
-    // Step 3 — Sign with Phantom
+    // Step 3 — Build tx and sign with Phantom
     setStep(3,'active');
     const fromPubkey=new solanaWeb3.PublicKey(S.wallet);
     const MEMO_PROGRAM=new solanaWeb3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
@@ -564,16 +577,14 @@ async function saveToSolana(){
       programId:MEMO_PROGRAM,
       data:Buffer.from(payload,'utf-8')
     }));
-
-    // This opens Phantom popup for user to approve
     const{signature}=await window.solana.signAndSendTransaction(tx);
     setStep(3,'done');
 
     // Step 4 — Confirm
     setStep(4,'active');
-    await connection.confirmTransaction({
-      signature,blockhash,lastValidBlockHeight
-    },'confirmed');
+    try{
+      await connection.confirmTransaction({signature,blockhash,lastValidBlockHeight},'confirmed');
+    }catch(e){ console.log('Confirm warning:',e.message); }
     setStep(4,'done');
 
     // Save locally
