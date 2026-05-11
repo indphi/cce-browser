@@ -561,16 +561,17 @@ async function saveToSolana(){
     setStep(3,'active');
     const fromPubkey=new solanaWeb3.PublicKey(S.wallet);
     const MEMO_PROGRAM=new solanaWeb3.PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
-    const tx=new solanaWeb3.Transaction({
-      recentBlockhash:blockhash,
-      feePayer:fromPubkey,
-      lastValidBlockHeight
-    });
+    // Build transaction explicitly setting blockhash after creation
+    const tx=new solanaWeb3.Transaction();
+    tx.recentBlockhash=blockhash;
+    tx.feePayer=fromPubkey;
     tx.add(new solanaWeb3.TransactionInstruction({
       keys:[{pubkey:fromPubkey,isSigner:true,isWritable:false}],
       programId:MEMO_PROGRAM,
       data:new TextEncoder().encode(payload)
     }));
+    // Verify blockhash is set before sending
+    console.log('TX blockhash:', tx.recentBlockhash);
     const{signature}=await window.solana.signAndSendTransaction(tx);
     setStep(3,'done');
 
